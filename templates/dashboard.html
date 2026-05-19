@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}Dashboard – Smart Notes Vault{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrap">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <div class="sidebar-stat">
+        <span class="stat-num">{{ note_count }}</span>
+        <span class="stat-label">Encrypted Notes</span>
+      </div>
+      <a href="{{ url_for('notes.new_note') }}" class="btn-new-note">
+        <span class="plus-icon">+</span> New Note
+      </a>
+    </div>
+
+    {% if all_tags %}
+    <div class="tag-section">
+      <div class="sidebar-section-label">Tags</div>
+      <div class="tag-cloud">
+        <a href="{{ url_for('notes.dashboard') }}"
+           class="tag-chip {% if not tag_filter %}active{% endif %}">All</a>
+        {% for tag in all_tags %}
+        <a href="{{ url_for('notes.dashboard', tag=tag) }}"
+           class="tag-chip {% if tag_filter == tag %}active{% endif %}">{{ tag }}</a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="sidebar-footer">
+      <div class="enc-badge">🔐 AES-256 Encrypted</div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="notes-main">
+    <!-- Search bar -->
+    <div class="search-bar-wrap">
+      <form method="GET" action="{{ url_for('notes.dashboard') }}" class="search-form">
+        <div class="search-input-wrap">
+          <span class="search-icon">⌕</span>
+          <input type="text" name="q" value="{{ search }}" placeholder="Search your notes…" class="search-input">
+          {% if tag_filter %}<input type="hidden" name="tag" value="{{ tag_filter }}">{% endif %}
+          <button type="submit" class="search-btn">Search</button>
+        </div>
+      </form>
+    </div>
+
+    {% if notes %}
+    <div class="notes-grid">
+      {% for note in notes %}
+      <div class="note-card {% if note.is_pinned %}pinned{% endif %}" data-id="{{ note.id }}">
+        {% if note.is_pinned %}
+        <div class="pin-badge">📌 Pinned</div>
+        {% endif %}
+        <div class="note-card-body">
+          <h3 class="note-title">
+            <a href="{{ url_for('notes.view_note', note_id=note.id) }}">{{ note.title }}</a>
+          </h3>
+          {% if note.tags_list() %}
+          <div class="note-tags">
+            {% for tag in note.tags_list() %}
+            <span class="note-tag">{{ tag }}</span>
+            {% endfor %}
+          </div>
+          {% endif %}
+          <div class="note-meta">
+            <span>{{ note.word_count }} words</span>
+            <span class="dot">·</span>
+            <span>{{ note.updated_at.strftime('%b %d, %Y') if note.updated_at else '' }}</span>
+          </div>
+        </div>
+        <div class="note-card-actions">
+          <a href="{{ url_for('notes.view_note', note_id=note.id) }}" class="card-btn" title="View">👁</a>
+          <a href="{{ url_for('notes.edit_note', note_id=note.id) }}" class="card-btn" title="Edit">✏️</a>
+          <button class="card-btn pin-btn" data-id="{{ note.id }}"
+                  title="{{ 'Unpin' if note.is_pinned else 'Pin' }}">
+            {{ '📌' if note.is_pinned else '📍' }}
+          </button>
+          <form method="POST" action="{{ url_for('notes.delete_note', note_id=note.id) }}"
+                class="delete-form" onsubmit="return confirmDelete('{{ note.title }}')">
+            <button type="submit" class="card-btn danger-btn" title="Delete">🗑</button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    {% elif search or tag_filter %}
+    <div class="empty-state">
+      <div class="empty-icon">🔍</div>
+      <h3>No notes found</h3>
+      <p>Try a different search or <a href="{{ url_for('notes.dashboard') }}">clear filters</a>.</p>
+    </div>
+
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">🗒️</div>
+      <h3>Your vault is empty</h3>
+      <p>Create your first encrypted note to get started.</p>
+      <a href="{{ url_for('notes.new_note') }}" class="btn-primary">Create First Note</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // Pin toggle
+  document.querySelectorAll('.pin-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.dataset.id;
+      const res = await fetch(`/note/${id}/pin`, { method: 'POST' });
+      if (res.ok) location.reload();
+    });
+  });
+
+  function confirmDelete(title) {
+    return confirm(`Delete "${title}" permanently? This cannot be undone.`);
+  }
+</script>
+{% endblock %}

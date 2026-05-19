@@ -1,0 +1,15 @@
+[Unit]
+Description=Gunicorn instance to serve Smart Notes Vault
+After=network.target
+
+[Service]
+User=ec2-user
+Group=www-data
+WorkingDirectory=/home/ec2-user/smart-notes-vault
+Environment="PATH=/home/ec2-user/smart-notes-vault/venv/bin"
+EnvironmentFile=/home/ec2-user/smart-notes-vault/.env
+ExecStart=/home/ec2-user/smart-notes-vault/venv/bin/gunicorn -c gunicorn.conf.py app:app
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Login – Smart Notes Vault{% endblock %}
+{% block main_class %}auth-page{% endblock %}
+
+{% block content %}
+<div class="auth-grid">
+  <div class="auth-left">
+    <div class="auth-brand">
+      <div class="shield-icon">🔐</div>
+      <h1 class="auth-heading">Smart<br><span class="accent">Notes</span><br>Vault</h1>
+      <p class="auth-tagline">Your encrypted cloud sanctuary.<br>Only you hold the key.</p>
+    </div>
+    <div class="auth-features">
+      <div class="feat"><span class="feat-dot"></span>AES-256 end-to-end encryption</div>
+      <div class="feat"><span class="feat-dot"></span>OTP multi-factor authentication</div>
+      <div class="feat"><span class="feat-dot"></span>Zero-knowledge cloud storage</div>
+    </div>
+  </div>
+
+  <div class="auth-right">
+    <div class="auth-card">
+      <div class="card-header">
+        <h2>Access Your Vault</h2>
+        <p>Enter your credentials to continue</p>
+      </div>
+
+      <form method="POST" action="{{ url_for('auth.login') }}" class="auth-form" novalidate>
+        <div class="field-group">
+          <label for="email">Email address</label>
+          <div class="input-wrap">
+            <span class="input-icon">@</span>
+            <input type="email" id="email" name="email" placeholder="you@example.com"
+                   value="{{ request.form.get('email','') }}" required autocomplete="email">
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="password">Password</label>
+          <div class="input-wrap">
+            <span class="input-icon">🔑</span>
+            <input type="password" id="password" name="password"
+                   placeholder="Your password" required autocomplete="current-password">
+            <button type="button" class="toggle-pw" onclick="togglePw('password')">👁</button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary btn-full">
+          <span>Send OTP & Continue</span>
+          <span class="btn-arrow">→</span>
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        Don't have an account? <a href="{{ url_for('auth.signup') }}">Create one free</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Sign Up – Smart Notes Vault{% endblock %}
+{% block main_class %}auth-page{% endblock %}
+
+{% block content %}
+<div class="auth-grid">
+  <div class="auth-left">
+    <div class="auth-brand">
+      <div class="shield-icon">🔐</div>
+      <h1 class="auth-heading">Join the<br><span class="accent">Vault</span></h1>
+      <p class="auth-tagline">Create your private encrypted space. Free forever.</p>
+    </div>
+    <div class="auth-features">
+      <div class="feat"><span class="feat-dot"></span>Notes encrypted before upload</div>
+      <div class="feat"><span class="feat-dot"></span>AWS S3 + RDS cloud backend</div>
+      <div class="feat"><span class="feat-dot"></span>Email OTP on every login</div>
+    </div>
+  </div>
+
+  <div class="auth-right">
+    <div class="auth-card">
+      <div class="card-header">
+        <h2>Create Account</h2>
+        <p>Set up your secure vault in seconds</p>
+      </div>
+
+      <form method="POST" action="{{ url_for('auth.signup') }}" class="auth-form" novalidate>
+        <div class="field-group">
+          <label for="full_name">Full name</label>
+          <div class="input-wrap">
+            <span class="input-icon">✦</span>
+            <input type="text" id="full_name" name="full_name" placeholder="Your full name"
+                   value="{{ request.form.get('full_name','') }}" required>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="email">Email address</label>
+          <div class="input-wrap">
+            <span class="input-icon">@</span>
+            <input type="email" id="email" name="email" placeholder="you@example.com"
+                   value="{{ request.form.get('email','') }}" required>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="password">Password <small>(min. 8 characters)</small></label>
+          <div class="input-wrap">
+            <span class="input-icon">🔑</span>
+            <input type="password" id="password" name="password"
+                   placeholder="Strong password" required minlength="8">
+            <button type="button" class="toggle-pw" onclick="togglePw('password')">👁</button>
+          </div>
+          <div class="pw-strength" id="pw-strength"></div>
+        </div>
+
+        <div class="field-group">
+          <label for="confirm_password">Confirm password</label>
+          <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <input type="password" id="confirm_password" name="confirm_password"
+                   placeholder="Repeat password" required>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary btn-full">
+          <span>Create My Vault</span>
+          <span class="btn-arrow">→</span>
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        Already have an account? <a href="{{ url_for('auth.login') }}">Sign in</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  document.getElementById('password').addEventListener('input', function() {
+    const bar = document.getElementById('pw-strength');
+    const v   = this.value;
+    let score = 0;
+    if (v.length >= 8)  score++;
+    if (v.length >= 12) score++;
+    if (/[A-Z]/.test(v)) score++;
+    if (/[0-9]/.test(v)) score++;
+    if (/[^A-Za-z0-9]/.test(v)) score++;
+    const labels = ['', 'Weak', 'Fair', 'Good', 'Strong', 'Very Strong'];
+    const colors = ['', '#e74c3c', '#e67e22', '#f0a500', '#00d4aa', '#00ff99'];
+    bar.textContent = v ? labels[score] : '';
+    bar.style.color = colors[score];
+  });
+</script>
+{% endblock %}

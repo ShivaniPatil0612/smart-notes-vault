@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit Note' if mode == 'edit' else 'New Note' }} – Smart Notes Vault{% endblock %}
+
+{% block extra_head %}
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<style>
+  /* Custom Dark Theme for Quill.js */
+  .ql-toolbar.ql-snow {
+    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px 12px 0 0;
+  }
+  .ql-container.ql-snow {
+    border-color: rgba(255, 255, 255, 0.1);
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    background: transparent;
+    color: #e2e8f0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1.05rem;
+    min-height: 400px;
+  }
+  .ql-snow .ql-stroke {
+    stroke: rgba(255, 255, 255, 0.7);
+  }
+  .ql-snow .ql-fill, .ql-snow .ql-stroke.ql-fill {
+    fill: rgba(255, 255, 255, 0.7);
+  }
+  .ql-snow.ql-toolbar button:hover .ql-stroke, .ql-snow .ql-toolbar button:hover .ql-stroke, .ql-snow.ql-toolbar button:focus .ql-stroke, .ql-snow .ql-toolbar button:focus .ql-stroke, .ql-snow.ql-toolbar button.ql-active .ql-stroke, .ql-snow .ql-toolbar button.ql-active .ql-stroke, .ql-snow.ql-toolbar .ql-picker-label:hover .ql-stroke, .ql-snow .ql-toolbar .ql-picker-label:hover .ql-stroke, .ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-stroke, .ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-stroke, .ql-snow.ql-toolbar .ql-picker-item:hover .ql-stroke, .ql-snow .ql-toolbar .ql-picker-item:hover .ql-stroke, .ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-stroke, .ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-stroke, .ql-snow.ql-toolbar button:hover .ql-stroke-miter, .ql-snow .ql-toolbar button:hover .ql-stroke-miter, .ql-snow.ql-toolbar button:focus .ql-stroke-miter, .ql-snow .ql-toolbar button:focus .ql-stroke-miter, .ql-snow.ql-toolbar button.ql-active .ql-stroke-miter, .ql-snow .ql-toolbar button.ql-active .ql-stroke-miter, .ql-snow.ql-toolbar .ql-picker-label:hover .ql-stroke-miter, .ql-snow .ql-toolbar .ql-picker-label:hover .ql-stroke-miter, .ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-stroke-miter, .ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-stroke-miter, .ql-snow.ql-toolbar .ql-picker-item:hover .ql-stroke-miter, .ql-snow .ql-toolbar .ql-picker-item:hover .ql-stroke-miter, .ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-stroke-miter, .ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-stroke-miter {
+    stroke: #00ffcc;
+  }
+  .ql-snow.ql-toolbar button:hover .ql-fill, .ql-snow .ql-toolbar button:hover .ql-fill, .ql-snow.ql-toolbar button:focus .ql-fill, .ql-snow .ql-toolbar button:focus .ql-fill, .ql-snow.ql-toolbar button.ql-active .ql-fill, .ql-snow .ql-toolbar button.ql-active .ql-fill, .ql-snow.ql-toolbar .ql-picker-label:hover .ql-fill, .ql-snow .ql-toolbar .ql-picker-label:hover .ql-fill, .ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-fill, .ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-fill, .ql-snow.ql-toolbar .ql-picker-item:hover .ql-fill, .ql-snow .ql-toolbar .ql-picker-item:hover .ql-fill, .ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-fill, .ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-fill, .ql-snow.ql-toolbar button:hover .ql-stroke.ql-fill, .ql-snow .ql-toolbar button:hover .ql-stroke.ql-fill, .ql-snow.ql-toolbar button:focus .ql-stroke.ql-fill, .ql-snow .ql-toolbar button:focus .ql-stroke.ql-fill, .ql-snow.ql-toolbar button.ql-active .ql-stroke.ql-fill, .ql-snow .ql-toolbar button.ql-active .ql-stroke.ql-fill, .ql-snow.ql-toolbar .ql-picker-label:hover .ql-stroke.ql-fill, .ql-snow .ql-toolbar .ql-picker-label:hover .ql-stroke.ql-fill, .ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-stroke.ql-fill, .ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-stroke.ql-fill, .ql-snow.ql-toolbar .ql-picker-item:hover .ql-stroke.ql-fill, .ql-snow .ql-toolbar .ql-picker-item:hover .ql-stroke.ql-fill, .ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-stroke.ql-fill, .ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-stroke.ql-fill {
+    fill: #00ffcc;
+  }
+  .ql-snow .ql-picker { color: rgba(255, 255, 255, 0.7); }
+  .ql-snow .ql-picker-options { background-color: #1a1e29; border-color: rgba(255, 255, 255, 0.1); }
+  
+  /* Highly visible cursor */
+  .ql-editor {
+    caret-color: #00ffcc;
+  }
+  .ql-editor.ql-blank::before {
+    color: rgba(255, 255, 255, 0.3);
+    font-style: normal;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="editor-wrap">
+  <div class="editor-header">
+    <a href="{{ url_for('notes.dashboard') }}" class="back-btn">← Dashboard</a>
+    <div class="editor-title-badge">
+      {% if mode == 'edit' %}✏️ Edit Note{% else %}+ New Note{% endif %}
+    </div>
+    <div class="enc-label">🔐 Encrypted on save</div>
+  </div>
+
+  <form method="POST"
+        action="{{ url_for('notes.edit_note', note_id=note.id) if mode == 'edit' else url_for('notes.new_note') }}"
+        class="editor-form" id="note-form">
+
+    <div class="editor-top-bar">
+      <input type="text" name="title" id="note-title"
+             placeholder="Note title…" value="{{ title }}"
+             class="title-input" required maxlength="500">
+    </div>
+
+    <!-- Quill Editor Container -->
+    <div id="quill-editor">{{ content | safe }}</div>
+    
+    <!-- Hidden textarea to store the HTML for submission -->
+    <textarea name="content" id="note-content" style="display:none;"></textarea>
+
+    <div class="editor-bottom-bar">
+      <div class="meta-fields">
+        <div class="field-group compact">
+          <label for="tags">Tags <small>(comma-separated)</small></label>
+          <input type="text" name="tags" id="tags" value="{{ tags }}"
+                 placeholder="work, ideas, personal" class="tags-input">
+        </div>
+        <label class="pin-toggle">
+          <input type="checkbox" name="is_pinned" {% if is_pinned %}checked{% endif %}>
+          <span class="pin-toggle-label">📌 Pin this note</span>
+        </label>
+      </div>
+
+      <div class="editor-actions">
+        <a href="{{ url_for('notes.dashboard') }}" class="btn-ghost">Cancel</a>
+        <button type="submit" class="btn-primary">
+          🔐 {{ 'Save Changes' if mode == 'edit' else 'Encrypt & Save' }}
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+<script>
+  // Initialize Professional Quill WYSIWYG Editor
+  const quill = new Quill('#quill-editor', {
+    theme: 'snow',
+    placeholder: 'Write your note here...',
+    modules: {
+      toolbar: [
+        [{ 'header': [1, 2, 3, false] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+        ['blockquote', 'code-block'],
+        [{ 'align': [] }],
+        ['link'],
+        ['clean']
+      ]
+    }
+  });
+
+  // Automatically focus the editor
+  quill.focus();
+
+  const form = document.getElementById('note-form');
+  const hiddenTextarea = document.getElementById('note-content');
+
+  // Copy Quill HTML into the hidden textarea before submitting
+  form.addEventListener('submit', function(e) {
+    // If the editor is completely empty, quill leaves a <p><br></p>
+    let html = quill.root.innerHTML;
+    if (html === '<p><br></p>') html = '';
+    hiddenTextarea.value = html;
+  });
+
+  // Ctrl+S to save the note
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      // Manually trigger form submission
+      let html = quill.root.innerHTML;
+      if (html === '<p><br></p>') html = '';
+      hiddenTextarea.value = html;
+      form.submit();
+    }
+  });
+</script>
+{% endblock %}

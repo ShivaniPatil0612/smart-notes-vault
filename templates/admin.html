@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Smart Notes Vault{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+  <div class="header-main">
+    <h1 class="page-title">Admin Dashboard</h1>
+    <p style="color: var(--text-secondary); margin-top: 5px;">Total Users: <span style="color: var(--accent); font-weight: 600;">{{ total_users }}</span></p>
+  </div>
+  <div class="header-actions">
+    <a href="{{ url_for('notes.dashboard') }}" class="btn btn-secondary">← Back to My Vault</a>
+  </div>
+</div>
+
+<div class="notes-grid" style="grid-template-columns: 1fr;">
+  <div class="note-card" style="padding: 0; overflow: hidden;">
+    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+      <thead>
+        <tr style="background: rgba(255,255,255,0.05); border-bottom: 1px solid var(--border);">
+          <th style="padding: 16px; font-weight: 600; color: var(--text-secondary);">User Name</th>
+          <th style="padding: 16px; font-weight: 600; color: var(--text-secondary);">Email ID</th>
+          <th style="padding: 16px; font-weight: 600; color: var(--text-secondary);">Registered On</th>
+          <th style="padding: 16px; font-weight: 600; color: var(--text-secondary); text-align: right;">Total Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in user_data %}
+        <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s;">
+          <td style="padding: 16px; font-weight: 500;">{{ u.name }}</td>
+          <td style="padding: 16px; color: var(--text-secondary);">{{ u.email }}</td>
+          <td style="padding: 16px; color: var(--text-secondary);">{{ u.registered_at.strftime('%Y-%m-%d %H:%M') if u.registered_at else 'Unknown' }}</td>
+          <td style="padding: 16px; font-weight: 600; color: var(--accent); text-align: right;">{{ u.note_count }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="4" style="padding: 32px; text-align: center; color: var(--text-secondary);">No users found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

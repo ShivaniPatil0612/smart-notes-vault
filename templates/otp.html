@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Verify OTP – Smart Notes Vault{% endblock %}
+{% block main_class %}auth-page{% endblock %}
+
+{% block content %}
+<div class="otp-wrapper">
+  <div class="otp-card">
+    <div class="otp-icon-ring">🔐</div>
+    <h2>Verification Required</h2>
+    <p class="otp-sub">A 6-digit code was sent to<br><strong>{{ email }}</strong></p>
+
+    <form method="POST" action="{{ url_for('auth.verify_otp') }}" id="otp-form">
+      <div class="otp-inputs">
+        {% for i in range(6) %}
+        <input type="text" class="otp-digit" maxlength="1" pattern="[0-9]"
+               inputmode="numeric" autocomplete="one-time-code"
+               {% if i == 0 %}autofocus{% endif %}>
+        {% endfor %}
+        <input type="hidden" name="otp" id="otp-hidden">
+      </div>
+
+      <button type="submit" class="btn-primary btn-full" id="otp-submit" disabled>
+        <span>Verify & Enter Vault</span>
+        <span class="btn-arrow">→</span>
+      </button>
+    </form>
+
+    <div class="otp-timer">
+      Code expires in <span id="countdown" class="accent">10:00</span>
+    </div>
+
+    <form method="POST" action="{{ url_for('auth.resend_otp') }}" class="resend-form">
+      <button type="submit" class="btn-ghost" id="resend-btn" disabled>
+        Resend OTP
+      </button>
+    </form>
+
+    <a href="{{ url_for('auth.login') }}" class="back-link">← Back to login</a>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // OTP digit navigation
+  const digits = document.querySelectorAll('.otp-digit');
+  const hidden = document.getElementById('otp-hidden');
+  const submit = document.getElementById('otp-submit');
+  const resend = document.getElementById('resend-btn');
+
+  digits.forEach((d, i) => {
+    d.addEventListener('input', e => {
+      d.value = d.value.replace(/\D/g, '');
+      if (d.value && i < 5) digits[i + 1].focus();
+      updateHidden();
+    });
+    d.addEventListener('keydown', e => {
+      if (e.key === 'Backspace' && !d.value && i > 0) digits[i - 1].focus();
+      if (e.key === 'ArrowLeft'  && i > 0) digits[i - 1].focus();
+      if (e.key === 'ArrowRight' && i < 5) digits[i + 1].focus();
+    });
+    d.addEventListener('paste', e => {
+      e.preventDefault();
+      const text = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
+      [...text.slice(0, 6)].forEach((ch, idx) => {
+        if (digits[idx]) digits[idx].value = ch;
+      });
+      if (text.length >= 6) digits[5].focus();
+      updateHidden();
+    });
+  });
+
+  function updateHidden() {
+    const val = [...digits].map(d => d.value).join('');
+    hidden.value = val;
+    submit.disabled = val.length < 6;
+  }
+
+  // Countdown
+  let secs = 600;
+  const cd = document.getElementById('countdown');
+  const timer = setInterval(() => {
+    secs--;
+    if (secs <= 0) {
+      clearInterval(timer);
+      cd.textContent = 'Expired';
+      cd.style.color = '#e74c3c';
+      submit.disabled = true;
+      resend.disabled = false;
+      return;
+    }
+    if (secs === 300) resend.disabled = false;  // allow resend after 5 min
+    const m = String(Math.floor(secs / 60)).padStart(2, '0');
+    const s = String(secs % 60).padStart(2, '0');
+    cd.textContent = `${m}:${s}`;
+    if (secs < 60) cd.style.color = '#e74c3c';
+  }, 1000);
+</script>
+{% endblock %}

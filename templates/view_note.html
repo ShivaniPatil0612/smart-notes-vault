@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}{{ note.title }} – Smart Notes Vault{% endblock %}
+
+{% block content %}
+<div class="view-wrap">
+  <div class="view-header">
+    <div class="view-header-left">
+      <a href="{{ url_for('notes.dashboard') }}" class="back-btn">← Dashboard</a>
+    </div>
+    <div class="view-header-actions">
+      <a href="{{ url_for('notes.edit_note', note_id=note.id) }}" class="btn-secondary">✏️ Edit</a>
+      <form method="POST" action="{{ url_for('notes.delete_note', note_id=note.id) }}"
+            style="display:inline"
+            onsubmit="return confirm('Delete this note permanently?')">
+        <button type="submit" class="btn-danger">🗑 Delete</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="view-card">
+    <div class="view-meta-bar">
+      <span class="enc-dot">🔓 Decrypted</span>
+      {% if note.is_pinned %}<span class="pin-indicator">📌 Pinned</span>{% endif %}
+      <span class="meta-date">Last updated: {{ note.updated_at.strftime('%B %d, %Y at %H:%M') if note.updated_at else 'N/A' }}</span>
+      <span class="meta-words">{{ note.word_count }} words</span>
+    </div>
+
+    <h1 class="view-title">{{ note.title }}</h1>
+
+    {% if note.tags_list() %}
+    <div class="view-tags">
+      {% for tag in note.tags_list() %}
+      <a href="{{ url_for('notes.dashboard', tag=tag) }}" class="tag-chip">{{ tag }}</a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <hr class="view-divider">
+
+    <div class="note-content" id="note-content">{{ content | safe }}</div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<!-- Quill CSS for styling the content accurately -->
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<style>
+  /* Match the dark theme for the view mode */
+  .ql-editor {
+    padding: 0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1.05rem;
+    color: #e2e8f0;
+  }
+</style>
+<script>
+  // The content is already rendered as HTML safely by Jinja.
+  // We wrap it in ql-editor to inherit Quill's styles (lists, blockquotes, etc)
+  const el = document.getElementById('note-content');
+  el.classList.add('ql-editor');
+</script>
+{% endblock %}

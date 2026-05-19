@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Smart Notes Vault{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  {% if current_user.is_authenticated %}
+  <nav class="navbar">
+    <a class="navbar-brand" href="{{ url_for('notes.dashboard') }}">
+      <span class="brand-icon">🔐</span>
+      <span class="brand-name">Smart<span class="accent">Notes</span>Vault</span>
+    </a>
+    <div class="navbar-right">
+      {% if current_user.role == 'admin' %}
+      <a href="{{ url_for('auth.admin_dashboard') }}" class="btn-logout" style="background: var(--accent); color: var(--bg); margin-right: 15px; border: none;">Admin Panel</a>
+      {% endif %}
+      <span class="user-pill">
+        <span class="user-dot"></span>{{ current_user.full_name.split()[0] }}
+      </span>
+      <a href="{{ url_for('auth.logout') }}" class="btn-logout">Sign Out</a>
+    </div>
+  </nav>
+  {% endif %}
+
+  <div class="flash-container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">
+          <span class="flash-icon">{% if category == 'success' %}✓{% elif category == 'error' %}✕{% elif category == 'warning' %}⚠{% else %}ℹ{% endif %}</span>
+          {{ message }}
+          <button class="flash-close" onclick="this.parentElement.remove()">×</button>
+        </div>
+      {% endfor %}
+    {% endwith %}
+  </div>
+
+  <main class="main-content {% block main_class %}{% endblock %}">
+    {% block content %}{% endblock %}
+  </main>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>
